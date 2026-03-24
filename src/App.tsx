@@ -1,17 +1,17 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, ReactNode } from 'react';
 
 // --- TypeScript Interfaces ---
 
 interface CardProps {
   title: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   info?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 interface FieldProps {
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
   description?: string;
 }
 
