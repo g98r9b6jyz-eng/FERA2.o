@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 // --- TypeScript Interfaces ---
 
@@ -60,6 +60,7 @@ const Card = ({ title, icon, info, children }: CardProps) => {
         </div>
         {info && (
           <button 
+            type="button"
             onClick={() => setShowInfo(!showInfo)} 
             className={`p-1 rounded-full transition-colors ${showInfo ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
             title="More Information"
@@ -128,7 +129,7 @@ const Slider = ({ value, onChange, min, max, step = 1, suffix = '' }: SliderProp
 const Toggle = ({ active, onChange, label, accent = "indigo" }: ToggleProps) => (
   <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors h-full">
     <span className="text-sm font-medium text-slate-700 dark:text-slate-300 pr-2 leading-tight">{label}</span>
-    <button onClick={() => onChange(!active)} className={`shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${active ? (accent==='emerald' ? 'bg-emerald-500' : 'bg-indigo-600 dark:bg-indigo-500') : 'bg-slate-300 dark:bg-slate-600'}`}>
+    <button type="button" onClick={() => onChange(!active)} className={`shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${active ? (accent==='emerald' ? 'bg-emerald-500' : 'bg-indigo-600 dark:bg-indigo-500') : 'bg-slate-300 dark:bg-slate-600'}`}>
       <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${active ? 'translate-x-6' : 'translate-x-1'}`} />
     </button>
   </div>
@@ -198,11 +199,11 @@ export default function App() {
   const handleIraFreqChange = (newFreq: 'Monthly' | 'Annual') => {
     if (newFreq === iraFreq) return;
     if (newFreq === 'Monthly') {
-       setTradIraContrib(tradIraContrib === '' ? '' : Math.round(tradIraContrib / 12));
-       setRothIraContrib(rothIraContrib === '' ? '' : Math.round(rothIraContrib / 12));
+       setTradIraContrib(tradIraContrib === '' ? '' : Math.round(Number(tradIraContrib) / 12));
+       setRothIraContrib(rothIraContrib === '' ? '' : Math.round(Number(rothIraContrib) / 12));
     } else {
-       setTradIraContrib(tradIraContrib === '' ? '' : Math.round(tradIraContrib * 12));
-       setRothIraContrib(rothIraContrib === '' ? '' : Math.round(rothIraContrib * 12));
+       setTradIraContrib(tradIraContrib === '' ? '' : Math.round(Number(tradIraContrib) * 12));
+       setRothIraContrib(rothIraContrib === '' ? '' : Math.round(Number(rothIraContrib) * 12));
     }
     setIraFreq(newFreq);
     setIraWarning('');
@@ -255,7 +256,7 @@ export default function App() {
   const [debtRate, setDebtRate] = useState(6.5);
   const [debtTerm, setDebtTerm] = useState(10);
   const [debtExtra, setDebtExtra] = useState(100);
-  const [debtInvestReturn] = useState(7.0); // Kept state but setter removed to avoid warning
+  const [debtInvestReturn] = useState(7.0);
 
   // Mortgage
   const [mortgageStartDate, setMortgageStartDate] = useState('2019-06');
@@ -265,7 +266,7 @@ export default function App() {
   const [mortgageTerm, setMortgageTerm] = useState(30);
   const [mortgageExtra, setMortgageExtra] = useState(300);
   const [mortgageEscrow, setMortgageEscrow] = useState(500);
-  const [mortgageInvestReturn] = useState(7.0); // Kept state but setter removed to avoid warning
+  const [mortgageInvestReturn] = useState(7.0);
 
   // --- MATH ENGINE ---
   const results = useMemo(() => {
@@ -416,7 +417,7 @@ export default function App() {
     // --- Prior 401(k) ---
     let simPrior401k = prior401kBal * Math.pow(1 + (prior401kReturn / 100), yearsToRetire);
 
-    // --- Taxable Brokerage Loop (Wired to Stop Age) ---
+    // --- Taxable Brokerage Loop ---
     let simBrokerage = brokerageBalance;
     const broRatePerPeriod = brokerageFreq === 'Monthly' ? (brokerageReturn / 100) / 12 : (brokerageReturn / 100);
     const broPeriodsPerYear = brokerageFreq === 'Monthly' ? 12 : 1;
@@ -510,12 +511,12 @@ export default function App() {
       ? [{l: 24500, r: 0.10}, {l: 99700, r: 0.12}, {l: 212500, r: 0.22}, {l: 405800, r: 0.24}, {l: 515200, r: 0.32}, {l: 772900, r: 0.35}, {l: Infinity, r: 0.37}]
       : [{l: 12250, r: 0.10}, {l: 49850, r: 0.12}, {l: 106250, r: 0.22}, {l: 202900, r: 0.24}, {l: 257600, r: 0.32}, {l: 386450, r: 0.35}, {l: Infinity, r: 0.37}];
 
-    for (let i = 0, prev = 0; i < brackets.length; i++) {
+    for (let i = 0, prevLimit = 0; i < brackets.length; i++) {
         const b = brackets[i];
-        if (incomeAfterDeduction > prev) {
-            let taxableAtThisBracket = Math.min(incomeAfterDeduction, b.l) - prev;
+        if (incomeAfterDeduction > prevLimit) {
+            let taxableAtThisBracket = Math.min(incomeAfterDeduction, b.l) - prevLimit;
             annualFedTax += taxableAtThisBracket * b.r;
-            prev = b.l;
+            prevLimit = b.l;
         } else break;
     }
     
@@ -533,8 +534,7 @@ export default function App() {
     const monthlyPostTaxTradIra = yr1TradIra / 12;
     const monthlyPostTaxRothIra = yr1RothIra / 12;
     const monthlyMega = yr1Mega / 12;
-    const currentAgeForBroCheck = currentYear - birthYear;
-    const canContribBroYr1 = currentAgeForBroCheck < brokerageContribStopAge;
+    const canContribBroYr1 = (currentYear - birthYear) < brokerageContribStopAge;
     const monthlyBrokerage = canContribBroYr1 ? (brokerageFreq === 'Monthly' ? brokerageContrib : brokerageContrib / 12) : 0;
     
     const totalPostTaxSavings = monthlyPostTaxRothTsp + monthlyPostTaxTradIra + monthlyPostTaxRothIra + monthlyMega + monthlyBrokerage;
@@ -595,6 +595,7 @@ export default function App() {
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight">F.E.R.A - Federal Employee Retirement Analyzer</h1>
           </div>
           <button 
+            type="button"
             onClick={() => setIsDarkMode(!isDarkMode)} 
             className="p-2 rounded-full bg-indigo-600 dark:bg-indigo-800 hover:bg-indigo-500 dark:hover:bg-indigo-700 transition-colors shadow-sm shrink-0 ml-4"
             title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
@@ -631,8 +632,8 @@ export default function App() {
                <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Filing Status</label>
                 <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-lg">
-                  <button onClick={() => setFilingStatus('Single')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${filingStatus === 'Single' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Single</button>
-                  <button onClick={() => setFilingStatus('Married')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${filingStatus === 'Married' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Married</button>
+                  <button type="button" onClick={() => setFilingStatus('Single')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${filingStatus === 'Single' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Single</button>
+                  <button type="button" onClick={() => setFilingStatus('Married')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${filingStatus === 'Married' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Married</button>
                 </div>
               </div>
               <Field label="Dependents"><NumberInput value={dependents} onChange={(v) => typeof v === 'number' && setDependents(v)} min={0} /></Field>
@@ -692,8 +693,8 @@ export default function App() {
               <div className="mt-4 space-y-4">
                 <div className="flex flex-col gap-1.5">
                    <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-lg">
-                      <button onClick={() => setTspInputMode('%')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${tspInputMode === '%' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>% of Salary</button>
-                      <button onClick={() => setTspInputMode('$')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${tspInputMode === '$' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>$ per Pay Period</button>
+                      <button type="button" onClick={() => setTspInputMode('%')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${tspInputMode === '%' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>% of Salary</button>
+                      <button type="button" onClick={() => setTspInputMode('$')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${tspInputMode === '$' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>$ per Pay Period</button>
                    </div>
                 </div>
                 {tspInputMode === '%' ? (
@@ -749,8 +750,8 @@ export default function App() {
               </div>
 
               <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-lg">
-                <button onClick={() => handleIraFreqChange('Monthly')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${iraFreq === 'Monthly' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Monthly</button>
-                <button onClick={() => handleIraFreqChange('Annual')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${iraFreq === 'Annual' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Annual</button>
+                <button type="button" onClick={() => handleIraFreqChange('Monthly')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${iraFreq === 'Monthly' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Monthly</button>
+                <button type="button" onClick={() => handleIraFreqChange('Annual')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${iraFreq === 'Annual' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Annual</button>
               </div>
             </div>
             <div className="mt-2">
@@ -778,8 +779,8 @@ export default function App() {
             </div>
             <div className="mt-3">
               <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-lg">
-                <button onClick={() => setMegaFreq('Monthly')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${megaFreq === 'Monthly' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Monthly</button>
-                <button onClick={() => setMegaFreq('Annual')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${megaFreq === 'Annual' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Annual</button>
+                <button type="button" onClick={() => setMegaFreq('Monthly')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${megaFreq === 'Monthly' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Monthly</button>
+                <button type="button" onClick={() => setMegaFreq('Annual')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${megaFreq === 'Annual' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Annual</button>
               </div>
             </div>
           </Card>
@@ -793,8 +794,8 @@ export default function App() {
               <Field label="Contribution Amount"><NumberInput value={brokerageContrib} onChange={(v) => typeof v === 'number' && setBrokerageContrib(v)} prefix="$" /></Field>
             </div>
             <div className="mt-3 flex bg-slate-100 dark:bg-slate-900 p-1 rounded-lg">
-                <button onClick={() => setBrokerageFreq('Monthly')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${brokerageFreq === 'Monthly' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Monthly</button>
-                <button onClick={() => setBrokerageFreq('Annual')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${brokerageFreq === 'Annual' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Annual</button>
+                <button type="button" onClick={() => setBrokerageFreq('Monthly')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${brokerageFreq === 'Monthly' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Monthly</button>
+                <button type="button" onClick={() => setBrokerageFreq('Annual')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${brokerageFreq === 'Annual' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Annual</button>
             </div>
             <div className="mt-4">
                 <Field label="Stop Contributions At Age" description="Age to stop adding funds (compounds forever)">
