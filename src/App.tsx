@@ -1,8 +1,55 @@
 import React, { useState, useMemo, useEffect } from 'react';
 
+// --- TypeScript Interfaces ---
+
+interface CardProps {
+  title: string;
+  icon: React.ReactNode;
+  info?: string;
+  children: React.ReactNode;
+}
+
+interface FieldProps {
+  label: string;
+  children: React.ReactNode;
+  description?: string;
+}
+
+interface NumberInputProps {
+  value: number | '';
+  onChange: (val: number | '') => void;
+  prefix?: string;
+  suffix?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  disabled?: boolean;
+}
+
+interface MonthInputProps {
+  value: string;
+  onChange: (val: string) => void;
+}
+
+interface SliderProps {
+  value: number;
+  onChange: (val: number) => void;
+  min: number;
+  max: number;
+  step?: number;
+  suffix?: string;
+}
+
+interface ToggleProps {
+  active: boolean;
+  onChange: (val: boolean) => void;
+  label: string;
+  accent?: "indigo" | "emerald";
+}
+
 // --- Reusable UI Components ---
 
-const Card = ({ title, icon, info, children }) => {
+const Card = ({ title, icon, info, children }: CardProps) => {
   const [showInfo, setShowInfo] = useState(false);
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden mb-6 transition-colors">
@@ -35,7 +82,7 @@ const Card = ({ title, icon, info, children }) => {
   );
 };
 
-const Field = ({ label, children, description }) => (
+const Field = ({ label, children, description }: FieldProps) => (
   <div className="flex flex-col gap-1.5">
     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</label>
     {description && <span className="text-xs text-slate-500 dark:text-slate-400 mb-1">{description}</span>}
@@ -43,7 +90,7 @@ const Field = ({ label, children, description }) => (
   </div>
 );
 
-const NumberInput = ({ value, onChange, prefix, suffix, min, max, step = 1, disabled = false }) => {
+const NumberInput = ({ value, onChange, prefix, suffix, min, max, step = 1, disabled = false }: NumberInputProps) => {
   return (
     <div className="relative flex items-center">
       {prefix && <span className={`absolute left-3 text-sm ${disabled ? 'text-slate-400 dark:text-slate-600' : 'text-slate-500 dark:text-slate-400'}`}>{prefix}</span>}
@@ -60,7 +107,7 @@ const NumberInput = ({ value, onChange, prefix, suffix, min, max, step = 1, disa
   );
 };
 
-const MonthInput = ({ value, onChange }) => {
+const MonthInput = ({ value, onChange }: MonthInputProps) => {
   return (
     <input
       type="month" 
@@ -71,14 +118,14 @@ const MonthInput = ({ value, onChange }) => {
   );
 };
 
-const Slider = ({ value, onChange, min, max, step = 1, suffix = '' }) => (
+const Slider = ({ value, onChange, min, max, step = 1, suffix = '' }: SliderProps) => (
   <div className="flex items-center gap-4">
     <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-400" />
     <span className="text-sm font-medium text-slate-700 dark:text-slate-300 min-w-[3.5rem] text-right">{value}{suffix}</span>
   </div>
 );
 
-const Toggle = ({ active, onChange, label, accent = "indigo" }) => (
+const Toggle = ({ active, onChange, label, accent = "indigo" }: ToggleProps) => (
   <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors h-full">
     <span className="text-sm font-medium text-slate-700 dark:text-slate-300 pr-2 leading-tight">{label}</span>
     <button onClick={() => onChange(!active)} className={`shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${active ? (accent==='emerald' ? 'bg-emerald-500' : 'bg-indigo-600 dark:bg-indigo-500') : 'bg-slate-300 dark:bg-slate-600'}`}>
@@ -95,8 +142,6 @@ export default function App() {
   // Application State
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isPortfolioExpanded, setIsPortfolioExpanded] = useState(false);
-  const [isStandardDebtExpanded, setIsStandardDebtExpanded] = useState(false);
-  const [isMortgageExpanded, setIsMortgageExpanded] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) document.documentElement.classList.add('dark');
@@ -111,7 +156,7 @@ export default function App() {
   const [sickLeaveDays, setSickLeaveDays] = useState(180);
 
   // Taxes & Cash Flow Info
-  const [filingStatus, setFilingStatus] = useState('Married');
+  const [filingStatus, setFilingStatus] = useState<'Single' | 'Married'>('Married');
   const [dependents, setDependents] = useState(2);
   const [fersRate, setFersRate] = useState(4.4);
   const [fehbPremium, setFehbPremium] = useState(450);
@@ -135,49 +180,51 @@ export default function App() {
   // TSP Advanced Inputs
   const [isMaxTsp, setIsMaxTsp] = useState(false);
   const [maxTspRothPct, setMaxTspRothPct] = useState(0); 
-  const [tspInputMode, setTspInputMode] = useState('%'); 
-  const [tradTspInput, setTradTspInput] = useState(5.0);
-  const [rothTspInput, setRothTspInput] = useState(0.0);
+  const [tspInputMode, setTspInputMode] = useState<'%' | '$'>('%'); 
+  const [tradTspInput, setTradTspInput] = useState<number | ''>(5.0);
+  const [rothTspInput, setRothTspInput] = useState<number | ''>(0.0);
   const [tspReturn, setTspReturn] = useState(7.0);
 
   // IRA
   const [tradIraBalance, setTradIraBalance] = useState(10000);
   const [rothIraBalance, setRothIraBalance] = useState(10000);
-  const [tradIraContrib, setTradIraContrib] = useState(0);
-  const [rothIraContrib, setRothIraContrib] = useState(625); 
-  const [iraFreq, setIraFreq] = useState('Monthly');
+  const [tradIraContrib, setTradIraContrib] = useState<number | ''>(0);
+  const [rothIraContrib, setRothIraContrib] = useState<number | ''>(625); 
+  const [iraFreq, setIraFreq] = useState<'Monthly' | 'Annual'>('Monthly');
   const [iraReturn, setIraReturn] = useState(7.0);
   const [iraWarning, setIraWarning] = useState('');
   const [iraContribStopAge, setIraContribStopAge] = useState(55);
 
-  const handleIraFreqChange = (newFreq) => {
+  const handleIraFreqChange = (newFreq: 'Monthly' | 'Annual') => {
     if (newFreq === iraFreq) return;
     if (newFreq === 'Monthly') {
-       setTradIraContrib(Math.round(tradIraContrib / 12));
-       setRothIraContrib(Math.round(rothIraContrib / 12));
+       setTradIraContrib(tradIraContrib === '' ? '' : Math.round(tradIraContrib / 12));
+       setRothIraContrib(rothIraContrib === '' ? '' : Math.round(rothIraContrib / 12));
     } else {
-       setTradIraContrib(Math.round(tradIraContrib * 12));
-       setRothIraContrib(Math.round(rothIraContrib * 12));
+       setTradIraContrib(tradIraContrib === '' ? '' : Math.round(tradIraContrib * 12));
+       setRothIraContrib(rothIraContrib === '' ? '' : Math.round(rothIraContrib * 12));
     }
     setIraFreq(newFreq);
     setIraWarning('');
   };
 
-  const handleIraInput = (type, val) => {
+  const handleIraInput = (type: 'Trad' | 'Roth', val: number | '') => {
     const annualLimit = (currentYear - birthYear) >= 50 ? 8600 : 7500;
     const periodLimit = iraFreq === 'Monthly' ? annualLimit / 12 : annualLimit;
     
     let safeVal = val;
     if (type === 'Trad') {
-      const maxAllow = Math.max(0, periodLimit - rothIraContrib);
-      if (val > maxAllow) { 
+      const currentRoth = typeof rothIraContrib === 'number' ? rothIraContrib : 0;
+      const maxAllow = Math.max(0, periodLimit - currentRoth);
+      if (typeof val === 'number' && val > maxAllow) { 
         safeVal = maxAllow; 
         setIraWarning(`2026 Projected Max Reached: Combined limit is ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(annualLimit)}/yr.`); 
       } else { setIraWarning(''); }
       setTradIraContrib(safeVal);
     } else {
-      const maxAllow = Math.max(0, periodLimit - tradIraContrib);
-      if (val > maxAllow) { 
+      const currentTrad = typeof tradIraContrib === 'number' ? tradIraContrib : 0;
+      const maxAllow = Math.max(0, periodLimit - currentTrad);
+      if (typeof val === 'number' && val > maxAllow) { 
         safeVal = maxAllow; 
         setIraWarning(`2026 Projected Max Reached: Combined limit is ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(annualLimit)}/yr.`); 
       } else { setIraWarning(''); }
@@ -192,12 +239,12 @@ export default function App() {
   // Mega Backdoor
   const [megaBal, setMegaBal] = useState(0);
   const [megaContrib, setMegaContrib] = useState(0);
-  const [megaFreq, setMegaFreq] = useState('Monthly');
+  const [megaFreq, setMegaFreq] = useState<'Monthly' | 'Annual'>('Monthly');
 
   // Taxable Brokerage
   const [brokerageBalance, setBrokerageBalance] = useState(50000);
   const [brokerageContrib, setBrokerageContrib] = useState(500);
-  const [brokerageFreq, setBrokerageFreq] = useState('Monthly');
+  const [brokerageFreq, setBrokerageFreq] = useState<'Monthly' | 'Annual'>('Monthly');
   const [brokerageReturn, setBrokerageReturn] = useState(7.0);
   const [brokerageContribStopAge, setBrokerageContribStopAge] = useState(55);
 
@@ -208,7 +255,7 @@ export default function App() {
   const [debtRate, setDebtRate] = useState(6.5);
   const [debtTerm, setDebtTerm] = useState(10);
   const [debtExtra, setDebtExtra] = useState(100);
-  const [debtInvestReturn, setDebtInvestReturn] = useState(7.0);
+  const [debtInvestReturn] = useState(7.0); // Kept state but setter removed to avoid warning
 
   // Mortgage
   const [mortgageStartDate, setMortgageStartDate] = useState('2019-06');
@@ -218,7 +265,7 @@ export default function App() {
   const [mortgageTerm, setMortgageTerm] = useState(30);
   const [mortgageExtra, setMortgageExtra] = useState(300);
   const [mortgageEscrow, setMortgageEscrow] = useState(500);
-  const [mortgageInvestReturn, setMortgageInvestReturn] = useState(7.0);
+  const [mortgageInvestReturn] = useState(7.0); // Kept state but setter removed to avoid warning
 
   // --- MATH ENGINE ---
   const results = useMemo(() => {
@@ -271,8 +318,8 @@ export default function App() {
         targetBiweeklyTrad = (tspLimit * (1 - (maxTspRothPct / 100))) / 26;
         targetBiweeklyRoth = (tspLimit * (maxTspRothPct / 100)) / 26;
       } else {
-        targetBiweeklyTrad = tspInputMode === '%' ? biweeklyGross * (tradTspInput / 100) : tradTspInput;
-        targetBiweeklyRoth = tspInputMode === '%' ? biweeklyGross * (rothTspInput / 100) : rothTspInput;
+        targetBiweeklyTrad = tspInputMode === '%' ? biweeklyGross * ((typeof tradTspInput === 'number' ? tradTspInput : 0) / 100) : (typeof tradTspInput === 'number' ? tradTspInput : 0);
+        targetBiweeklyRoth = tspInputMode === '%' ? biweeklyGross * ((typeof rothTspInput === 'number' ? rothTspInput : 0) / 100) : (typeof rothTspInput === 'number' ? rothTspInput : 0);
       }
 
       for (let pp = 0; pp < 26; pp++) {
@@ -329,8 +376,8 @@ export default function App() {
       let ytdIra = 0;
       let ytdMega = 0;
 
-      let targetPeriodTradIra = canContribIra ? tradIraContrib : 0;
-      let targetPeriodRothIra = canContribIra ? rothIraContrib : 0;
+      let targetPeriodTradIra = canContribIra ? (typeof tradIraContrib === 'number' ? tradIraContrib : 0) : 0;
+      let targetPeriodRothIra = canContribIra ? (typeof rothIraContrib === 'number' ? rothIraContrib : 0) : 0;
       let targetPeriodMega = megaContrib;
 
       for (let p = 0; p < periodsPerYear; p++) {
@@ -385,7 +432,7 @@ export default function App() {
     }
 
     // --- Debt Engine ---
-    const calcDebt = (origP, currentP, rate, t, extra, startStr, invRateAnnual) => {
+    const calcDebt = (origP: number, currentP: number, rate: number, t: number, extra: number, invRateAnnual: number) => {
       const r = (rate / 100) / 12; 
       const n = t * 12; 
       const minPmt = origP > 0 && r > 0 ? (origP * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1) : (n > 0 ? origP / n : 0);
@@ -412,7 +459,7 @@ export default function App() {
       const accPayoffDate = new Date(current);
       if (monthsAcc !== Infinity) accPayoffDate.setMonth(current.getMonth() + monthsAcc);
 
-      const fmtDate = (d) => d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      const fmtDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
       const invRateMonthly = (invRateAnnual / 100) / 12;
       let fvInvestExtra = 0;
       let fvPayoffThenInvest = 0;
@@ -436,8 +483,8 @@ export default function App() {
       };
     };
     
-    const standardDebtStats = calcDebt(debtOriginal, debtCurrent, debtRate, debtTerm, debtExtra, debtStartDate, debtInvestReturn);
-    const mortgageStats = calcDebt(mortgageOriginal, mortgageCurrent, mortgageRate, mortgageTerm, mortgageExtra, mortgageStartDate, mortgageInvestReturn);
+    const standardDebtStats = calcDebt(debtOriginal, debtCurrent, debtRate, debtTerm, debtExtra, debtInvestReturn);
+    const mortgageStats = calcDebt(mortgageOriginal, mortgageCurrent, mortgageRate, mortgageTerm, mortgageExtra, mortgageInvestReturn);
 
     // --- Cash Flow Engine ---
     const baseMonthlyGross = currentSalary / 12;
@@ -514,12 +561,12 @@ export default function App() {
     tradIraBalance, rothIraBalance, tradIraContrib, rothIraContrib, iraContribStopAge, iraFreq, iraReturn,
     prior401kBal, prior401kReturn,
     megaBal, megaContrib, megaFreq, brokerageBalance, brokerageContrib, brokerageFreq, brokerageReturn, brokerageContribStopAge,
-    debtStartDate, debtOriginal, debtCurrent, debtRate, debtTerm, debtExtra, debtInvestReturn,
-    mortgageStartDate, mortgageOriginal, mortgageCurrent, mortgageRate, mortgageTerm, mortgageExtra, mortgageEscrow, mortgageInvestReturn
+    debtOriginal, debtCurrent, debtRate, debtTerm, debtExtra, debtInvestReturn,
+    mortgageOriginal, mortgageCurrent, mortgageRate, mortgageTerm, mortgageExtra, mortgageEscrow, mortgageInvestReturn
   ]);
 
-  const fmtCur = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
-  const fmtNum = (val) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(val);
+  const fmtCur = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+  const fmtNum = (val: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(val);
 
   const icons = {
     user: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
@@ -566,10 +613,10 @@ export default function App() {
             info="Defines your Federal creditable tenure. Under OPM rules, 'Prior Service' includes bought-back military time. 'Sick Leave' adds to your multiplier using the 2,087-hour chart, but it does NOT count toward the 20-year requirement needed for the 1.1% bump."
           >
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Birth Year"><NumberInput value={birthYear} onChange={setBirthYear} /></Field>
-              <Field label="Age Started Fed"><NumberInput value={ageStarted} onChange={setAgeStarted} /></Field>
-              <Field label="Target Retire Age"><NumberInput value={retireAge} onChange={setRetireAge} /></Field>
-              <Field label="Prior Uniformed Svc" description="Years bought back"><NumberInput value={priorService} onChange={setPriorService} suffix="yrs" /></Field>
+              <Field label="Birth Year"><NumberInput value={birthYear} onChange={(v) => typeof v === 'number' && setBirthYear(v)} /></Field>
+              <Field label="Age Started Fed"><NumberInput value={ageStarted} onChange={(v) => typeof v === 'number' && setAgeStarted(v)} /></Field>
+              <Field label="Target Retire Age"><NumberInput value={retireAge} onChange={(v) => typeof v === 'number' && setRetireAge(v)} /></Field>
+              <Field label="Prior Uniformed Svc" description="Years bought back"><NumberInput value={priorService} onChange={(v) => typeof v === 'number' && setPriorService(v)} suffix="yrs" /></Field>
             </div>
             <Field label="Unused Sick Leave" description="Converts to creditable time (OPM 360-day yr)">
               <Slider value={sickLeaveDays} onChange={setSickLeaveDays} min={0} max={365} step={1} suffix=" days" />
@@ -588,13 +635,13 @@ export default function App() {
                   <button onClick={() => setFilingStatus('Married')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${filingStatus === 'Married' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Married</button>
                 </div>
               </div>
-              <Field label="Dependents"><NumberInput value={dependents} onChange={setDependents} min={0} /></Field>
-              <Field label="FERS Contribution Rate" description="0.8%, 3.1%, or 4.4%"><NumberInput value={fersRate} onChange={setFersRate} suffix="%" step={0.1} /></Field>
-              <Field label="FEHB Healthcare Prem." description="Monthly Pre-Tax"><NumberInput value={fehbPremium} onChange={setFehbPremium} prefix="$" /></Field>
+              <Field label="Dependents"><NumberInput value={dependents} onChange={(v) => typeof v === 'number' && setDependents(v)} min={0} /></Field>
+              <Field label="FERS Contribution Rate" description="0.8%, 3.1%, or 4.4%"><NumberInput value={fersRate} onChange={(v) => typeof v === 'number' && setFersRate(v)} suffix="%" step={0.1} /></Field>
+              <Field label="FEHB Healthcare Prem." description="Monthly Pre-Tax"><NumberInput value={fehbPremium} onChange={(v) => typeof v === 'number' && setFehbPremium(v)} prefix="$" /></Field>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
-               <Field label="Supplemental Income" description="Second job, VA disability, etc."><NumberInput value={supplementalIncome} onChange={setSupplementalIncome} prefix="$" /></Field>
+               <Field label="Supplemental Income" description="Second job, VA disability, etc."><NumberInput value={supplementalIncome} onChange={(v) => typeof v === 'number' && setSupplementalIncome(v)} prefix="$" /></Field>
                <div className="flex flex-col justify-end">
                  <Toggle active={supplementalTaxToggled} onChange={setSupplementalTaxToggled} label="Apply Taxes to this Income?" />
                </div>
@@ -606,8 +653,8 @@ export default function App() {
             info="Your gross FERS annuity uses your 'High-3' salary average. At 62+ with 20+ years, multiplier is 1.1%. Survivor benefit reduces pension by 10% to guarantee 50% for your spouse."
           >
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Max Grade Salary"><NumberInput value={maxGradeSalary} onChange={setMaxGradeSalary} prefix="$" /></Field>
-              <Field label="Est. Annual COLA"><NumberInput value={cola} onChange={setCola} suffix="%" step={0.1} /></Field>
+              <Field label="Max Grade Salary"><NumberInput value={maxGradeSalary} onChange={(v) => typeof v === 'number' && setMaxGradeSalary(v)} prefix="$" /></Field>
+              <Field label="Est. Annual COLA"><NumberInput value={cola} onChange={(v) => typeof v === 'number' && setCola(v)} suffix="%" step={0.1} /></Field>
             </div>
             <Toggle active={survivorBenefit} onChange={setSurvivorBenefit} label="Include Max Survivor Benefit (-10%)" />
             <Toggle active={fehb5Year} onChange={setFehb5Year} label="Meet 5-Year FEHB Rule?" />
@@ -618,15 +665,15 @@ export default function App() {
             info="Strictly applies 2026 Projected limits: $24,500 base | $8,000 standard Catch-Up (Age 50+) | $12,000 SECURE 2.0 Super Catch-Up (Ages 60-63). Auto-Max calculates absolute legal limit yearly based on age."
           >
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Current Federal Salary" description="Excludes supplemental"><NumberInput value={currentSalary} onChange={setCurrentSalary} prefix="$" /></Field>
-              <Field label="Est. Annual Raise"><NumberInput value={annualRaise} onChange={setAnnualRaise} suffix="%" step={0.1} /></Field>
+              <Field label="Current Federal Salary" description="Excludes supplemental"><NumberInput value={currentSalary} onChange={(v) => typeof v === 'number' && setCurrentSalary(v)} prefix="$" /></Field>
+              <Field label="Est. Annual Raise"><NumberInput value={annualRaise} onChange={(v) => typeof v === 'number' && setAnnualRaise(v)} suffix="%" step={0.1} /></Field>
             </div>
             
             <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700 mt-2 mb-2 transition-colors">
               <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-200 dark:border-slate-700 pb-2">Current TSP Balances</div>
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Traditional Bal"><NumberInput value={tradTsp} onChange={setTradTsp} prefix="$" /></Field>
-                <Field label="Roth Bal"><NumberInput value={rothTsp} onChange={setRothTsp} prefix="$" /></Field>
+                <Field label="Traditional Bal"><NumberInput value={tradTsp} onChange={(v) => typeof v === 'number' && setTradTsp(v)} prefix="$" /></Field>
+                <Field label="Roth Bal"><NumberInput value={rothTsp} onChange={(v) => typeof v === 'number' && setRothTsp(v)} prefix="$" /></Field>
               </div>
             </div>
 
@@ -651,8 +698,8 @@ export default function App() {
                 </div>
                 {tspInputMode === '%' ? (
                   <>
-                    <Field label="Trad Contribution Rate"><Slider value={tradTspInput} onChange={setTradTspInput} min={0} max={30} step={1} suffix="%" /></Field>
-                    <Field label="Roth Contribution Rate"><Slider value={rothTspInput} onChange={setRothTspInput} min={0} max={30} step={1} suffix="%" /></Field>
+                    <Field label="Trad Contribution Rate"><Slider value={typeof tradTspInput === 'number' ? tradTspInput : 0} onChange={setTradTspInput} min={0} max={100} step={1} suffix="%" /></Field>
+                    <Field label="Roth Contribution Rate"><Slider value={typeof rothTspInput === 'number' ? rothTspInput : 0} onChange={setRothTspInput} min={0} max={100} step={1} suffix="%" /></Field>
                   </>
                 ) : (
                   <div className="grid grid-cols-2 gap-4">
@@ -673,8 +720,8 @@ export default function App() {
             info="IRAs are private tax-advantaged accounts. Under updated 2026 Projected rules, combined limits are capped at $7,500/yr (or $8,600 if Age 50+)."
           >
             <div className="grid grid-cols-2 gap-4 border-b border-slate-100 dark:border-slate-700 pb-4">
-              <Field label="Trad IRA Balance"><NumberInput value={tradIraBalance} onChange={setTradIraBalance} prefix="$" /></Field>
-              <Field label="Roth IRA Balance"><NumberInput value={rothIraBalance} onChange={setRothIraBalance} prefix="$" /></Field>
+              <Field label="Trad IRA Balance"><NumberInput value={tradIraBalance} onChange={(v) => typeof v === 'number' && setTradIraBalance(v)} prefix="$" /></Field>
+              <Field label="Roth IRA Balance"><NumberInput value={rothIraBalance} onChange={(v) => typeof v === 'number' && setRothIraBalance(v)} prefix="$" /></Field>
             </div>
             
             <div className="mt-3">
@@ -697,7 +744,7 @@ export default function App() {
 
               <div className="mb-3">
                   <Field label="Stop Contributions At Age" description="Age to stop adding funds (compounds forever)">
-                        <NumberInput value={iraContribStopAge} onChange={setIraContribStopAge} />
+                        <NumberInput value={iraContribStopAge} onChange={(v) => typeof v === 'number' && setIraContribStopAge(v)} />
                   </Field>
               </div>
 
@@ -716,8 +763,8 @@ export default function App() {
             info="Old retirement accounts that continue to compound but no longer receive contributions."
           >
              <div className="grid grid-cols-2 gap-4">
-              <Field label="Legacy 401(k) Balance"><NumberInput value={prior401kBal} onChange={setPrior401kBal} prefix="$" /></Field>
-              <Field label="Expected Return"><NumberInput value={prior401kReturn} onChange={setPrior401kReturn} suffix="%" step={0.1} /></Field>
+              <Field label="Legacy 401(k) Balance"><NumberInput value={prior401kBal} onChange={(v) => typeof v === 'number' && setPrior401kBal(v)} prefix="$" /></Field>
+              <Field label="Expected Return"><NumberInput value={prior401kReturn} onChange={(v) => typeof v === 'number' && setPrior401kReturn(v)} suffix="%" step={0.1} /></Field>
             </div>
           </Card>
 
@@ -726,8 +773,8 @@ export default function App() {
             info="SECURE 2.0 options. Note: Federal TSP does NOT currently permit after-tax mega backdoor contributions."
           >
              <div className="grid grid-cols-2 gap-4">
-              <Field label="Current Mega/Alt Bal"><NumberInput value={megaBal} onChange={setMegaBal} prefix="$" /></Field>
-              <Field label="Contribution Amount"><NumberInput value={megaContrib} onChange={setMegaContrib} prefix="$" /></Field>
+              <Field label="Current Mega/Alt Bal"><NumberInput value={megaBal} onChange={(v) => typeof v === 'number' && setMegaBal(v)} prefix="$" /></Field>
+              <Field label="Contribution Amount"><NumberInput value={megaContrib} onChange={(v) => typeof v === 'number' && setMegaContrib(v)} prefix="$" /></Field>
             </div>
             <div className="mt-3">
               <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-lg">
@@ -742,8 +789,8 @@ export default function App() {
             info="Standard investment accounts (Vanguard, Fidelity, etc.) with no IRS limits or age withdrawal penalties."
           >
              <div className="grid grid-cols-2 gap-4">
-              <Field label="Current Brokerage Bal"><NumberInput value={brokerageBalance} onChange={setBrokerageBalance} prefix="$" /></Field>
-              <Field label="Contribution Amount"><NumberInput value={brokerageContrib} onChange={setBrokerageContrib} prefix="$" /></Field>
+              <Field label="Current Brokerage Bal"><NumberInput value={brokerageBalance} onChange={(v) => typeof v === 'number' && setBrokerageBalance(v)} prefix="$" /></Field>
+              <Field label="Contribution Amount"><NumberInput value={brokerageContrib} onChange={(v) => typeof v === 'number' && setBrokerageContrib(v)} prefix="$" /></Field>
             </div>
             <div className="mt-3 flex bg-slate-100 dark:bg-slate-900 p-1 rounded-lg">
                 <button onClick={() => setBrokerageFreq('Monthly')} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${brokerageFreq === 'Monthly' ? 'bg-white dark:bg-slate-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>Monthly</button>
@@ -751,7 +798,7 @@ export default function App() {
             </div>
             <div className="mt-4">
                 <Field label="Stop Contributions At Age" description="Age to stop adding funds (compounds forever)">
-                    <NumberInput value={brokerageContribStopAge} onChange={setBrokerageContribStopAge} />
+                    <NumberInput value={brokerageContribStopAge} onChange={(v) => typeof v === 'number' && setBrokerageContribStopAge(v)} />
                 </Field>
             </div>
             <div className="mt-4">
@@ -765,15 +812,15 @@ export default function App() {
           >
              <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-slate-100 dark:border-slate-700">
               <Field label="Loan Start Date"><MonthInput value={debtStartDate} onChange={setDebtStartDate} /></Field>
-              <Field label="Original Loan Amount"><NumberInput value={debtOriginal} onChange={setDebtOriginal} prefix="$" /></Field>
+              <Field label="Original Loan Amount"><NumberInput value={debtOriginal} onChange={(v) => typeof v === 'number' && setDebtOriginal(v)} prefix="$" /></Field>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Current Balance"><NumberInput value={debtCurrent} onChange={setDebtCurrent} prefix="$" /></Field>
-              <Field label="Original Term (Years)"><NumberInput value={debtTerm} onChange={setDebtTerm} /></Field>
+              <Field label="Current Balance"><NumberInput value={debtCurrent} onChange={(v) => typeof v === 'number' && setDebtCurrent(v)} prefix="$" /></Field>
+              <Field label="Original Term (Years)"><NumberInput value={debtTerm} onChange={(v) => typeof v === 'number' && setDebtTerm(v)} /></Field>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-4">
-              <Field label="Interest Rate"><NumberInput value={debtRate} onChange={setDebtRate} suffix="%" step={0.1} /></Field>
-              <Field label="Extra Monthly Principal"><NumberInput value={debtExtra} onChange={setDebtExtra} prefix="$" /></Field>
+              <Field label="Interest Rate"><NumberInput value={debtRate} onChange={(v) => typeof v === 'number' && setDebtRate(v)} suffix="%" step={0.1} /></Field>
+              <Field label="Extra Monthly Principal"><NumberInput value={debtExtra} onChange={(v) => typeof v === 'number' && setDebtExtra(v)} prefix="$" /></Field>
             </div>
           </Card>
 
@@ -783,18 +830,18 @@ export default function App() {
           >
              <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-slate-100 dark:border-slate-700">
               <Field label="Loan Start Date"><MonthInput value={mortgageStartDate} onChange={setMortgageStartDate} /></Field>
-              <Field label="Original Loan Amount"><NumberInput value={mortgageOriginal} onChange={setMortgageOriginal} prefix="$" /></Field>
+              <Field label="Original Loan Amount"><NumberInput value={mortgageOriginal} onChange={(v) => typeof v === 'number' && setMortgageOriginal(v)} prefix="$" /></Field>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Current Balance"><NumberInput value={mortgageCurrent} onChange={setMortgageCurrent} prefix="$" /></Field>
-              <Field label="Original Term (Years)"><NumberInput value={mortgageTerm} onChange={setMortgageTerm} /></Field>
+              <Field label="Current Balance"><NumberInput value={mortgageCurrent} onChange={(v) => typeof v === 'number' && setMortgageCurrent(v)} prefix="$" /></Field>
+              <Field label="Original Term (Years)"><NumberInput value={mortgageTerm} onChange={(v) => typeof v === 'number' && setMortgageTerm(v)} /></Field>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-4">
-              <Field label="Interest Rate"><NumberInput value={mortgageRate} onChange={setMortgageRate} suffix="%" step={0.1} /></Field>
-              <Field label="Extra Monthly Principal"><NumberInput value={mortgageExtra} onChange={setMortgageExtra} prefix="$" /></Field>
+              <Field label="Interest Rate"><NumberInput value={mortgageRate} onChange={(v) => typeof v === 'number' && setMortgageRate(v)} suffix="%" step={0.1} /></Field>
+              <Field label="Extra Monthly Principal"><NumberInput value={mortgageExtra} onChange={(v) => typeof v === 'number' && setMortgageExtra(v)} prefix="$" /></Field>
             </div>
             <div className="mt-4">
-              <Field label="Monthly Escrow (Tax/Ins)"><NumberInput value={mortgageEscrow} onChange={setMortgageEscrow} prefix="$" /></Field>
+              <Field label="Monthly Escrow (Tax/Ins)"><NumberInput value={mortgageEscrow} onChange={(v) => typeof v === 'number' && setMortgageEscrow(v)} prefix="$" /></Field>
             </div>
           </Card>
         </div>
